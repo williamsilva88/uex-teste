@@ -3,9 +3,43 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  font-size: 12px;
 }
 
 h1 {
   margin-bottom: 20px;
+}
+
+.login-page {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-form,
+.register-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.error {
+  color: red;
+  margin-top: 5px;
+}
+
+.success {
+  color: green;
+  margin-top: 5px;
+}
+
+md-filled-text-field,
+md-filled-button,
+md-outlined-button {
+  margin: 5px 0;
+  width: 300px;
 }

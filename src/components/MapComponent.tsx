@@ -9,7 +9,7 @@ type MapComponentProps = {
 };
 
 const defaultCenter = {
-  lat: -25.52177, // Coordenada padrão (Curitiba)
+  lat: -25.52177,
   lng: -49.24625,
 };
 
@@ -29,7 +29,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [googleMap, setGoogleMap] = useState<google.maps.Map>();
   const [isInfoWindowOpen, setIsInfoWindowOpen] = useState(true);
 
-  // Centro do mapa baseado na posição recebida ou no centro padrão
   const center = {
     lat: latitude ?? defaultCenter.lat,
     lng: longitude ?? defaultCenter.lng,
@@ -48,14 +47,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
         center={center}
         zoom={zoom}
       >
-        {/* Adiciona o marcador na posição atual */}
         {latitude && longitude && (
           <Marker
             position={{ lat: latitude, lng: longitude }}
             options={{ map: googleMap }}
             onClick={() => setIsInfoWindowOpen(true)}
           >
-            {/* Exibe a InfoWindow se estiver aberta */}
             {isInfoWindowOpen && (
               <InfoWindow
                 position={{ lat: latitude, lng: longitude }}
