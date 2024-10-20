@@ -1,6 +1,13 @@
+.logged-user {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
 .home-container {
     display: flex;
     height: 100vh;
+    width: calc(100vw);
 }
 
 .sidebar {
@@ -33,7 +40,6 @@
 
 .content {
     flex-grow: 1;
-    padding: 20px;
 }
 
 .bar-controls-head {}
@@ -45,7 +51,7 @@
 
 .bar-controls-footer {}
 
-.contacts-title{
+.contacts-title {
     border-top: 1px solid #d6d6d6;
     padding-top: 5px;
     text-align: center;

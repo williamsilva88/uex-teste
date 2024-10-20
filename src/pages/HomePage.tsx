@@ -4,6 +4,7 @@ import ContactService from "../services/ContactService";
 import { useNavigate } from "react-router-dom";
 import ContactModal from "../components/ContactModal";
 import ContactList from "../components/ContactList";
+import MapComponent from "../components/MapComponent";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignOutAlt, faPlus } from "@fortawesome/free-solid-svg-icons";
 import "./HomePage.css";
@@ -13,6 +14,8 @@ const HomePage: React.FC = () => {
   const user = AuthService.getLoggedUser();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [contacts, setContacts] = useState<any[]>([]);
+  const [contactToEdit, setContactToEdit] = useState<any | null>(null);
+  const [selectedContact, setSelectedContact] = useState<any | null>(null);
 
   useEffect(() => {
     loadContacts();
@@ -31,6 +34,7 @@ const HomePage: React.FC = () => {
   };
 
   const handleOpenModal = () => {
+    setContactToEdit(null);
     setIsModalOpen(true);
   };
 
@@ -39,34 +43,48 @@ const HomePage: React.FC = () => {
   };
 
   const handleAddContact = () => {
-    loadContacts(); // Recarrega a lista de contatos após adicionar
-    handleCloseModal(); // Fecha o modal após sucesso
+    loadContacts();
+    handleCloseModal();
   };
 
   const handleEditContact = (contact: any) => {
-    // Função para editar um contato (abrir modal de edição)
-    console.log("Editar contato:", contact);
+    setContactToEdit(contact);
+    setIsModalOpen(true);
   };
 
   const handleDeleteContact = (cpf: string) => {
-    const result = ContactService.deleteContact(user.email, cpf);
-    if (result.success) {
-      loadContacts(); // Atualiza a lista após exclusão
-    } else {
-      console.error(result.message);
+    const confirmDelete = window.confirm(
+      "Tem certeza de que deseja excluir este contato?"
+    );
+    if (confirmDelete) {
+      const result = ContactService.deleteContact(user.email, cpf);
+      if (result.success) {
+        loadContacts(); // Atualiza a lista de contatos
+        setSelectedContact(null); // Limpa o contato selecionado no mapa
+      } else {
+        console.error(result.message);
+      }
     }
   };
 
   const handleSelectContact = (contact: any) => {
-    console.log("Contato selecionado:", contact);
+    const latitude = parseFloat(contact.latitude);
+    const longitude = parseFloat(contact.longitude);
+
+    if (!isNaN(latitude) && !isNaN(longitude)) {
+      setSelectedContact({ ...contact, latitude, longitude });
+    } else {
+      console.error("Coordenadas inválidas para o contato selecionado");
+    }
   };
 
   return (
     <div className="home-container">
-      {/* Sidebar à esquerda */}
       <div className="sidebar">
         <div className="bar-controls-head">
-          <h2>Bem-vindo, {user?.name || "Usuário"}</h2>
+          <div className="logged-user">
+            Bem-vindo, {user?.name || "Usuário"}
+          </div>
           <button className="add-contact-button" onClick={handleOpenModal}>
             <FontAwesomeIcon icon={faPlus} style={{ marginRight: "8px" }} />
             Adicionar Contato
@@ -92,17 +110,21 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Área de conteúdo à direita */}
       <div className="content">
-        <h1>Página de Mapa</h1>
-        {/* <MapComponent latitude={-25.427} longitude={-49.273} /> */}
+        {selectedContact && (
+          <MapComponent
+            latitude={selectedContact.latitude}
+            longitude={selectedContact.longitude}
+            description={selectedContact.name}
+          />
+        )}
       </div>
 
-      {/* Modal de Adicionar Contato */}
       <ContactModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSuccess={handleAddContact}
+        initialContact={contactToEdit}
       />
     </div>
   );

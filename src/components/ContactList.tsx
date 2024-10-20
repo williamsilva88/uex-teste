@@ -1,7 +1,7 @@
 import React from "react";
-import { List, ListItem, ListItemText, IconButton } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
+import "./ContactList.css";
 
 type Contact = {
   name: string;
@@ -27,11 +27,42 @@ type ContactListProps = {
 
 const ContactList: React.FC<ContactListProps> = ({
   contacts,
+  onSelectContact,
+  onEditContact,
+  onDeleteContact,
 }) => {
   return (
-    <div>
+    <div style={{ paddingTop: "10px" }}>
       {contacts.map((contact, index) => (
-        <label>{contact?.name}</label>
+        <div
+          key={index}
+          className="contact-list-item"
+          onClick={() => onSelectContact(contact)}
+        >
+          <span>{contact?.name || "Contato sem Nome"}</span>
+          <div className="contact-list-buttons-container">
+            <button
+              className="contact-list-button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEditContact(contact);
+              }}
+              aria-label="Edit"
+            >
+              <FontAwesomeIcon icon={faEdit} className="contact-list-icon" />
+            </button>
+            <button
+              className="contact-list-button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteContact(contact.cpf);
+              }}
+              aria-label="Delete"
+            >
+              <FontAwesomeIcon icon={faTrash} className="contact-list-icon" />
+            </button>
+          </div>
+        </div>
       ))}
     </div>
   );

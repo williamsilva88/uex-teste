@@ -9,13 +9,13 @@ type MapComponentProps = {
 };
 
 const defaultCenter = {
-  lat: -25.52177,
-  lng: -49.24625,
+  lat: -25.4300759,
+  lng: -49.2717015,
 };
 
 const containerStyle = {
   width: "100%",
-  height: "400px",
+  height: "100%",
 };
 
 const libraries: any = ["places"];

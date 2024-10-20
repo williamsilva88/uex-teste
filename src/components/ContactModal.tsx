@@ -5,7 +5,6 @@ import "@material/web/button/outlined-button.js";
 import ContactService from "../services/ContactService";
 import AuthService from "../services/AuthService";
 import "./ContactModal.css";
-import { debounce } from "lodash";
 
 type ContactModalProps = {
   isOpen: boolean;
@@ -20,21 +19,6 @@ const ContactModal: React.FC<ContactModalProps> = ({
   onSuccess,
   initialContact,
 }) => {
-  const [contact, setContact] = useState<any>({
-    name: "",
-    cpf: "",
-    phone: "",
-    cep: "",
-    uf: "",
-    cidade: "",
-    bairro: "",
-    logradouro: "",
-    numero: "",
-    complemento: "",
-    latitude: "",
-    longitude: "",
-  });
-
   const refs = {
     name: useRef<HTMLInputElement>(null),
     cpf: useRef<HTMLInputElement>(null),
@@ -50,20 +34,59 @@ const ContactModal: React.FC<ContactModalProps> = ({
     longitude: useRef<HTMLInputElement>(null),
   };
 
-  useEffect(() => {
-    if (initialContact) {
-      setContact(initialContact);
-    }
-  }, [initialContact]);
+  // Estado local para controlar o preenchimento inicial dos campos
+  const [isEditing, setIsEditing] = useState(false);
 
-  const handleChange = (name: string, value: string) => {
-    setContact({ ...contact, [name]: value });
-  };
+  useEffect(() => {
+    // Preenche os campos ao abrir o modal para edição
+    if (initialContact && isOpen) {
+      Object.keys(refs).forEach((key) => {
+        const fieldRef = refs[key as keyof typeof refs].current;
+        if (fieldRef) {
+          fieldRef.value = initialContact[key] || "";
+        }
+      });
+      setIsEditing(true);
+    } else {
+      // Limpa os campos se o modal for aberto para adição de novo contato
+      Object.keys(refs).forEach((key) => {
+        const fieldRef = refs[key as keyof typeof refs].current;
+        if (fieldRef) {
+          fieldRef.value = "";
+        }
+      });
+      setIsEditing(false);
+    }
+  }, [initialContact, isOpen]);
 
   const handleSubmit = () => {
+    // Coleta os valores dos campos através dos refs
+    const updatedContact = {
+      name: refs.name.current?.value || "",
+      cpf: refs.cpf.current?.value || "",
+      phone: refs.phone.current?.value || "",
+      cep: refs.cep.current?.value || "",
+      uf: refs.uf.current?.value || "",
+      cidade: refs.cidade.current?.value || "",
+      bairro: refs.bairro.current?.value || "",
+      logradouro: refs.logradouro.current?.value || "",
+      numero: refs.numero.current?.value || "",
+      complemento: refs.complemento.current?.value || "",
+      latitude: refs.latitude.current?.value || "",
+      longitude: refs.longitude.current?.value || "",
+    };
+
     const user = AuthService.getLoggedUser();
     if (user) {
-      const result = ContactService.addContact(user.email, contact);
+      let result;
+      if (isEditing) {
+        // Atualiza o contato existente
+        result = ContactService.updateContact(user.email, updatedContact);
+      } else {
+        // Adiciona um novo contato
+        result = ContactService.addContact(user.email, updatedContact);
+      }
+
       if (result.success) {
         onSuccess(); // Notifica o sucesso ao HomePage
         onClose();   // Fecha o modal
@@ -91,88 +114,66 @@ const ContactModal: React.FC<ContactModalProps> = ({
     <div className="modal-overlay">
       <div className="modal-container">
         <div className="modal-header">
-          <h2>{initialContact ? "Atualizar Contato" : "Adicionar Contato"}</h2>
+          <h2>{isEditing ? "Atualizar Contato" : "Adicionar Contato"}</h2>
         </div>
         <div className="modal-content">
           <md-filled-text-field
             ref={refs.name}
             label="Nome"
-            value={contact.name}
-            oninput={(e: any) => handleChange("name", e.target.value)}
             style={styleField}
           ></md-filled-text-field>
           <md-filled-text-field
             ref={refs.cpf}
             label="CPF"
-            value={contact.cpf}
-            oninput={(e: any) => handleChange("cpf", e.target.value)}
             style={styleField}
           ></md-filled-text-field>
           <md-filled-text-field
             ref={refs.phone}
             label="Telefone"
-            value={contact.phone}
-            oninput={(e: any) => handleChange("phone", e.target.value)}
             style={styleField}
           ></md-filled-text-field>
           <md-filled-text-field
             ref={refs.cep}
             label="CEP"
-            value={contact.cep}
-            oninput={(e: any) => handleChange("cep", e.target.value)}
             style={styleField}
           ></md-filled-text-field>
           <md-filled-text-field
             ref={refs.uf}
             label="UF"
-            value={contact.uf}
-            oninput={(e: any) => handleChange("uf", e.target.value)}
             style={styleField}
           ></md-filled-text-field>
           <md-filled-text-field
             ref={refs.cidade}
             label="Cidade"
-            value={contact.cidade}
-            oninput={(e: any) => handleChange("cidade", e.target.value)}
             style={styleField}
           ></md-filled-text-field>
           <md-filled-text-field
             ref={refs.logradouro}
             label="Logradouro"
-            value={contact.logradouro}
-            oninput={(e: any) => handleChange("logradouro", e.target.value)}
             style={styleField}
           ></md-filled-text-field>
           <md-filled-text-field
             ref={refs.numero}
             label="Número"
-            value={contact.numero}
-            oninput={(e: any) => handleChange("numero", e.target.value)}
             style={styleField}
           ></md-filled-text-field>
           <md-filled-text-field
             ref={refs.complemento}
             label="Complemento"
-            value={contact.complemento}
-            oninput={(e: any) => handleChange("complemento", e.target.value)}
             style={styleField}
           ></md-filled-text-field>
           <md-filled-text-field
             ref={refs.latitude}
             label="Latitude"
-            value={contact.latitude}
-            oninput={(e: any) => handleChange("latitude", e.target.value)}
             style={styleField}
           ></md-filled-text-field>
           <md-filled-text-field
             ref={refs.longitude}
             label="Longitude"
-            value={contact.longitude}
-            oninput={(e: any) => handleChange("longitude", e.target.value)}
             style={styleField}
           ></md-filled-text-field>
           <md-filled-button onClick={handleSubmit} style={styleButton}>
-            {initialContact ? "Atualizar" : "Adicionar"}
+            {isEditing ? "Atualizar" : "Adicionar"}
           </md-filled-button>
           <md-outlined-button onClick={onClose} style={styleButton}>
             Cancelar
