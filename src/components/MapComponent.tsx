@@ -6,6 +6,7 @@ type MapComponentProps = {
   longitude?: number;
   zoom?: number;
   description?: string;
+  address?: string;
 };
 
 const defaultCenter = {
@@ -25,6 +26,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   longitude,
   zoom = 14,
   description = "",
+  address = "",
 }) => {
   const [googleMap, setGoogleMap] = useState<google.maps.Map>();
   const [isInfoWindowOpen, setIsInfoWindowOpen] = useState(true);
@@ -60,6 +62,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               >
                 <div style={{ padding: "8px", maxWidth: "200px" }}>
                   <h4 style={{ fontSize: "18px", margin: 0, color: "#333" }}>{description}</h4>
+                  <div style={{ fontSize: "14px", margin: 0, color: "#918b8b", paddingTop: "5px" }}>{address}</div>
                 </div>
               </InfoWindow>
             )}

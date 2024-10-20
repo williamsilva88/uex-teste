@@ -79,6 +79,19 @@ class AuthService {
     this.saveUsers(users);
     return true;
   }
+
+  deleteAccount() {
+    const user = this.getLoggedUser();
+
+    if (user) {
+      const users = this.getUsers();
+      const updatedUsers = users.filter(
+        (storedUser: any) => storedUser.email !== user.email
+      );
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updatedUsers));
+      this.logout();
+    }
+  }
 }
 
 export default new AuthService();

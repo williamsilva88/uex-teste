@@ -4,6 +4,7 @@ import "@material/web/button/filled-button.js";
 import "@material/web/button/outlined-button.js";
 import ContactService from "../services/ContactService";
 import AuthService from "../services/AuthService";
+import ViaCepService from "../services/ViaCepService";
 import "./ContactModal.css";
 
 type ContactModalProps = {
@@ -34,11 +35,9 @@ const ContactModal: React.FC<ContactModalProps> = ({
     longitude: useRef<HTMLInputElement>(null),
   };
 
-  // Estado local para controlar o preenchimento inicial dos campos
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    // Preenche os campos ao abrir o modal para edição
     if (initialContact && isOpen) {
       Object.keys(refs).forEach((key) => {
         const fieldRef = refs[key as keyof typeof refs].current;
@@ -48,7 +47,6 @@ const ContactModal: React.FC<ContactModalProps> = ({
       });
       setIsEditing(true);
     } else {
-      // Limpa os campos se o modal for aberto para adição de novo contato
       Object.keys(refs).forEach((key) => {
         const fieldRef = refs[key as keyof typeof refs].current;
         if (fieldRef) {
@@ -59,8 +57,33 @@ const ContactModal: React.FC<ContactModalProps> = ({
     }
   }, [initialContact, isOpen]);
 
+  const handleCepChange = async () => {
+    const cepValue = refs.cep.current?.value || "";
+
+    if (cepValue.length === 8) {
+      try {
+        const cepData = await ViaCepService.consultarCEP(cepValue);
+        if (cepData) {
+          if (refs.logradouro.current)
+            refs.logradouro.current.value = cepData?.logradouro || "";
+          if (refs.bairro.current)
+            refs.bairro.current.value = cepData?.bairro || "";
+          if (refs.cidade.current)
+            refs.cidade.current.value = cepData?.localidade || "";
+          if (refs.uf.current)
+            refs.uf.current.value = cepData?.uf || "";
+        }
+        console.log("refs:", refs);
+      } catch (error) {
+        console.error("Erro ao consultar o ViaCEP:", error);
+        alert(
+          "Não foi possível consultar o CEP. Verifique o valor e tente novamente."
+        );
+      }
+    }
+  };
+
   const handleSubmit = () => {
-    // Coleta os valores dos campos através dos refs
     const updatedContact = {
       name: refs.name.current?.value || "",
       cpf: refs.cpf.current?.value || "",
@@ -80,16 +103,14 @@ const ContactModal: React.FC<ContactModalProps> = ({
     if (user) {
       let result;
       if (isEditing) {
-        // Atualiza o contato existente
         result = ContactService.updateContact(user.email, updatedContact);
       } else {
-        // Adiciona um novo contato
         result = ContactService.addContact(user.email, updatedContact);
       }
 
       if (result.success) {
-        onSuccess(); // Notifica o sucesso ao HomePage
-        onClose();   // Fecha o modal
+        onSuccess();
+        onClose();
       } else {
         alert(result.message);
       }
@@ -136,6 +157,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
             ref={refs.cep}
             label="CEP"
             style={styleField}
+            onInput={handleCepChange}
           ></md-filled-text-field>
           <md-filled-text-field
             ref={refs.uf}
@@ -145,6 +167,11 @@ const ContactModal: React.FC<ContactModalProps> = ({
           <md-filled-text-field
             ref={refs.cidade}
             label="Cidade"
+            style={styleField}
+          ></md-filled-text-field>
+          <md-filled-text-field
+            ref={refs.bairro}
+            label="Bairro"
             style={styleField}
           ></md-filled-text-field>
           <md-filled-text-field
