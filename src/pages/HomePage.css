@@ -1,0 +1,53 @@
+.home-container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #f0f0f0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar h2 {
+    margin-bottom: 20px;
+}
+
+.logout-button {
+    padding: 10px 20px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.logout-button:hover {
+    background-color: #cc0000;
+}
+
+.content {
+    flex-grow: 1;
+    padding: 20px;
+}
+
+.bar-controls-head {}
+
+.bar-controls-content {
+    height: 100%;
+    width: 100%;
+}
+
+.bar-controls-footer {}
+
+.contacts-title{
+    border-top: 1px solid #d6d6d6;
+    padding-top: 5px;
+    text-align: center;
+    margin-top: 10px;
+}

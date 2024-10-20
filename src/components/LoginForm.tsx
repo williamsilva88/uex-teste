@@ -44,8 +44,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onRegister, onReset }) => {
     if (email && password) {
       const isAuthenticated = AuthService.login(email, password);
       if (isAuthenticated) {
-        localStorage.setItem("loggedInUser", email);
-        navigate("/home");
+        setError(null);
+        navigate("/home"); // Redireciona imediatamente para Home
       } else {
         setError("Email ou senha incorretos.");
       }
