@@ -19,12 +19,27 @@ class ContactService {
   addContact(email: string, contact: any) {
     const users = this.getUsers();
     const userIndex = users.findIndex((u: any) => u.email === email);
+  
     if (userIndex !== -1) {
       users[userIndex].contacts = users[userIndex].contacts || [];
+  
+      const existingContact = users[userIndex].contacts.find(
+        (c: any) => c.cpf === contact.cpf
+      );
+  
+      if (existingContact) {
+        return {
+          success: false,
+          message: "CPF já cadastrado para este usuário",
+        };
+      }
+  
       users[userIndex].contacts.push(contact);
       this.saveUsers(users);
+  
       return { success: true, message: "Contato adicionado com sucesso" };
     }
+  
     return { success: false, message: "Usuário não encontrado" };
   }
 

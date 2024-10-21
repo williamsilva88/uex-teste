@@ -6,12 +6,27 @@ import ContactService from "../services/ContactService";
 import AuthService from "../services/AuthService";
 import ViaCepService from "../services/ViaCepService";
 import "./ContactModal.css";
+import GoogleMapsService from "../services/GoogleMapsService";
 
 type ContactModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
   initialContact?: any;
+};
+
+// Função para aplicar máscara em tempo real
+const applyMask = (value: string, mask: string) => {
+  let i = 0;
+  return mask.replace(/9/g, () => value[i++] || "");
+};
+
+// Formata os campos com máscara ao carregar dados na edição
+const formatMaskedFields = (contact: any) => {
+  if (contact.cpf) contact.cpf = applyMask(contact.cpf, "999.999.999-99");
+  if (contact.phone) contact.phone = applyMask(contact.phone, "(99) 999999999");
+  if (contact.cep) contact.cep = applyMask(contact.cep, "99999-999");
+  return contact;
 };
 
 const ContactModal: React.FC<ContactModalProps> = ({
@@ -39,10 +54,11 @@ const ContactModal: React.FC<ContactModalProps> = ({
 
   useEffect(() => {
     if (initialContact && isOpen) {
+      const maskedContact = formatMaskedFields(initialContact);
       Object.keys(refs).forEach((key) => {
         const fieldRef = refs[key as keyof typeof refs].current;
         if (fieldRef) {
-          fieldRef.value = initialContact[key] || "";
+          fieldRef.value = maskedContact[key] || "";
         }
       });
       setIsEditing(true);
@@ -58,7 +74,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
   }, [initialContact, isOpen]);
 
   const handleCepChange = async () => {
-    const cepValue = refs.cep.current?.value || "";
+    let cepValue = refs.cep.current?.value || "";
+    cepValue = cepValue.replace(/\D/g, "");
 
     if (cepValue.length === 8) {
       try {
@@ -70,10 +87,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
             refs.bairro.current.value = cepData?.bairro || "";
           if (refs.cidade.current)
             refs.cidade.current.value = cepData?.localidade || "";
-          if (refs.uf.current)
-            refs.uf.current.value = cepData?.uf || "";
+          if (refs.uf.current) refs.uf.current.value = cepData?.uf || "";
         }
-        console.log("refs:", refs);
       } catch (error) {
         console.error("Erro ao consultar o ViaCEP:", error);
         alert(
@@ -83,12 +98,20 @@ const ContactModal: React.FC<ContactModalProps> = ({
     }
   };
 
+  const handleMaskedInput = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    mask: string
+  ) => {
+    const { value } = event.target;
+    event.target.value = applyMask(value.replace(/\D/g, ""), mask);
+  };
+
   const handleSubmit = () => {
     const updatedContact = {
       name: refs.name.current?.value || "",
-      cpf: refs.cpf.current?.value || "",
-      phone: refs.phone.current?.value || "",
-      cep: refs.cep.current?.value || "",
+      cpf: refs.cpf.current?.value.replace(/\D/g, "") || "",
+      phone: refs.phone.current?.value.replace(/\D/g, "") || "",
+      cep: refs.cep.current?.value.replace(/\D/g, "") || "",
       uf: refs.uf.current?.value || "",
       cidade: refs.cidade.current?.value || "",
       bairro: refs.bairro.current?.value || "",
@@ -131,6 +154,26 @@ const ContactModal: React.FC<ContactModalProps> = ({
     margin: "10px 0",
   };
 
+  const autocompleteGoogle = async() => {
+    const contact = {
+      uf: refs.uf.current?.value || "",
+      cidade: refs.cidade.current?.value || "",
+      bairro: refs.bairro.current?.value || "",
+      logradouro: refs.logradouro.current?.value || "",
+    };
+
+    const textSearch = [
+      contact.uf,
+      contact.cidade,
+      contact.bairro,
+      contact.logradouro,
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    // const data = await GoogleMapsService.getAutocompleteSuggestions(textSearch);
+  };
+
   return (
     <div className="modal-overlay">
       <div className="modal-container">
@@ -143,25 +186,48 @@ const ContactModal: React.FC<ContactModalProps> = ({
             label="Nome"
             style={styleField}
           ></md-filled-text-field>
-          <md-filled-text-field
-            ref={refs.cpf}
-            label="CPF"
-            style={styleField}
-          ></md-filled-text-field>
+
+          {/* Campo CPF com máscara e desabilitação */}
+          {isEditing ? (
+            <md-filled-text-field
+              ref={refs.cpf}
+              label="CPF"
+              style={styleField}
+              value={refs.cpf.current?.value}
+              disabled
+            ></md-filled-text-field>
+          ) : (
+            <md-filled-text-field
+              ref={refs.cpf}
+              label="CPF"
+              style={styleField}
+              onInput={(e: any) => handleMaskedInput(e, "999.999.999-99")}
+            ></md-filled-text-field>
+          )}
+
           <md-filled-text-field
             ref={refs.phone}
             label="Telefone"
             style={styleField}
+            onInput={(e: any) => handleMaskedInput(e, "(99) 999999999")}
           ></md-filled-text-field>
+
           <md-filled-text-field
             ref={refs.cep}
             label="CEP"
             style={styleField}
-            onInput={handleCepChange}
+            onInput={(e: any) => handleMaskedInput(e, "99999-999")}
+            onBlur={handleCepChange}
           ></md-filled-text-field>
           <md-filled-text-field
-            ref={refs.uf}
-            label="UF"
+            ref={refs.logradouro}
+            label="Logradouro"
+            style={styleField}
+            onInput={(e: any) => autocompleteGoogle()}
+          ></md-filled-text-field>
+          <md-filled-text-field
+            ref={refs.bairro}
+            label="Bairro"
             style={styleField}
           ></md-filled-text-field>
           <md-filled-text-field
@@ -170,13 +236,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
             style={styleField}
           ></md-filled-text-field>
           <md-filled-text-field
-            ref={refs.bairro}
-            label="Bairro"
-            style={styleField}
-          ></md-filled-text-field>
-          <md-filled-text-field
-            ref={refs.logradouro}
-            label="Logradouro"
+            ref={refs.uf}
+            label="UF"
             style={styleField}
           ></md-filled-text-field>
           <md-filled-text-field
@@ -199,6 +260,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
             label="Longitude"
             style={styleField}
           ></md-filled-text-field>
+
           <md-filled-button onClick={handleSubmit} style={styleButton}>
             {isEditing ? "Atualizar" : "Adicionar"}
           </md-filled-button>
