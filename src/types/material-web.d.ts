@@ -8,5 +8,7 @@ declare namespace JSX {
     "md-filled-text-field": any;
     "md-filled-button": any;
     "md-outlined-button": any;
+    "md-dialog": any;
+    "md-text-button": any;
   }
 }

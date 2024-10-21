@@ -6,16 +6,17 @@ type MapComponentProps = {
   longitude?: number;
   zoom?: number;
   description?: string;
+  address?: string;
 };
 
 const defaultCenter = {
-  lat: -25.52177,
-  lng: -49.24625,
+  lat: -25.4300759,
+  lng: -49.2717015,
 };
 
 const containerStyle = {
   width: "100%",
-  height: "400px",
+  height: "100%",
 };
 
 const libraries: any = ["places"];
@@ -25,13 +26,14 @@ const MapComponent: React.FC<MapComponentProps> = ({
   longitude,
   zoom = 14,
   description = "",
+  address = "",
 }) => {
   const [googleMap, setGoogleMap] = useState<google.maps.Map>();
   const [isInfoWindowOpen, setIsInfoWindowOpen] = useState(true);
 
   const center = {
-    lat: latitude ?? defaultCenter.lat,
-    lng: longitude ?? defaultCenter.lng,
+    lat: latitude ?? defaultCenter?.lat,
+    lng: longitude ?? defaultCenter?.lng,
   };
 
   const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
@@ -60,6 +62,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               >
                 <div style={{ padding: "8px", maxWidth: "200px" }}>
                   <h4 style={{ fontSize: "18px", margin: 0, color: "#333" }}>{description}</h4>
+                  <div style={{ fontSize: "14px", margin: 0, color: "#918b8b", paddingTop: "5px" }}>{address}</div>
                 </div>
               </InfoWindow>
             )}

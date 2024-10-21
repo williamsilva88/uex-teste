@@ -29,7 +29,7 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
     }
 
     const users = AuthService.getUsers();
-    const userExists = users.some((user) => user.email === email);
+    const userExists = users.some((user: any) => user.email === email);
 
     if (userExists) {
       setEmail(email);

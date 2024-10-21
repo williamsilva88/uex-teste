@@ -12,7 +12,6 @@ type LoginFormProps = {
 const LoginForm: React.FC<LoginFormProps> = ({ onRegister, onReset }) => {
   const [error, setError] = useState<string | null>(null);
 
-  // Refs para capturar os valores dos campos de entrada
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -44,7 +43,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onRegister, onReset }) => {
     if (email && password) {
       const isAuthenticated = AuthService.login(email, password);
       if (isAuthenticated) {
-        localStorage.setItem("loggedInUser", email);
+        setError(null);
         navigate("/home");
       } else {
         setError("Email ou senha incorretos.");
