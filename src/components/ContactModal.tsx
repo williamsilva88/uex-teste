@@ -7,6 +7,7 @@ import AuthService from "../services/AuthService";
 import ViaCepService from "../services/ViaCepService";
 import "./ContactModal.css";
 import { useToast } from "../contexts/ToastContext";
+import { cpf as cpfValidator } from "cpf-cnpj-validator";
 import GoogleMapsService from "../services/GoogleMapsService";
 
 type ContactModalProps = {
@@ -35,7 +36,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
   initialContact,
 }) => {
   const { addToast } = useToast();
-  
+
   const refs = {
     name: useRef<HTMLInputElement>(null),
     cpf: useRef<HTMLInputElement>(null),
@@ -52,6 +53,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
   };
 
   const [isEditing, setIsEditing] = useState(false);
+  const [cpfError, setCpfError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialContact && isOpen) {
@@ -74,6 +76,22 @@ const ContactModal: React.FC<ContactModalProps> = ({
     }
   }, [initialContact, isOpen]);
 
+  const validateCPF = (cpf: string) => {
+    const isValid = cpfValidator.isValid(cpf);
+    setCpfError(isValid ? null : "CPF inválido");
+    return isValid;
+  };
+
+  const handleCpfInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.target;
+    event.target.value = applyMask(value.replace(/\D/g, ""), "999.999.999-99");
+    if (!cpfValidator.isValid(value.replace(/\D/g, ""))) {
+      setCpfError("CPF inválido");
+    } else {
+      setCpfError(null);
+    }
+  };
+
   const handleCepChange = async () => {
     let cepValue = refs.cep.current?.value || "";
     cepValue = cepValue.replace(/\D/g, "");
@@ -92,7 +110,10 @@ const ContactModal: React.FC<ContactModalProps> = ({
         }
       } catch (error) {
         console.error("Erro ao consultar o ViaCEP:", error);
-        addToast("Não foi possível consultar o CEP. Verifique o valor e tente novamente.", "error");
+        addToast(
+          "Não foi possível consultar o CEP. Verifique o valor e tente novamente.",
+          "error"
+        );
       }
     }
   };
@@ -120,6 +141,11 @@ const ContactModal: React.FC<ContactModalProps> = ({
       latitude: refs.latitude.current?.value || "",
       longitude: refs.longitude.current?.value || "",
     };
+
+    if (!validateCPF(updatedContact.cpf)) {
+      addToast("CPF inválido. Corrija o campo antes de prosseguir.", "error");
+      return;
+    }
 
     const user = AuthService.getLoggedUser();
     if (user) {
@@ -153,7 +179,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
     margin: "10px 0",
   };
 
-  const autocompleteGoogle = async() => {
+  const autocompleteGoogle = async () => {
     const contact = {
       uf: refs.uf.current?.value || "",
       cidade: refs.cidade.current?.value || "",
@@ -199,9 +225,11 @@ const ContactModal: React.FC<ContactModalProps> = ({
               ref={refs.cpf}
               label="CPF"
               style={styleField}
-              onInput={(e: any) => handleMaskedInput(e, "999.999.999-99")}
+              onInput={(e: any) => {handleMaskedInput(e, "999.999.999-99");handleCpfInput}}
+              errorMessage={cpfError || ""}
             ></md-filled-text-field>
           )}
+           {!isEditing && cpfError && <div className="error-message">{cpfError}</div>}
 
           <md-filled-text-field
             ref={refs.phone}
