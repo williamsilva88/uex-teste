@@ -15,7 +15,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
 }) => {
   const [error, setError] = useState<string | null>(null);
 
-  // Refs para capturar os valores dos campos
   const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);

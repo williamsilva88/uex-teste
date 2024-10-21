@@ -7,17 +7,19 @@ import ContactList from "../components/ContactList";
 import MapComponent from "../components/MapComponent";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignOutAlt, faPlus, faCog } from "@fortawesome/free-solid-svg-icons";
+import { useToast } from "../contexts/ToastContext";
 import "./HomePage.css";
 
 const HomePage: React.FC = () => {
+  const { addToast } = useToast();
   const navigate = useNavigate();
   const user = AuthService.getLoggedUser();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // Modal de exclusão de conta
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleteContactDialogOpen, setIsDeleteContactDialogOpen] =
-    useState(false); // Modal de exclusão de contato
-  const [contactToDelete, setContactToDelete] = useState<any | null>(null); // Contato a ser excluído
+    useState(false);
+  const [contactToDelete, setContactToDelete] = useState<any | null>(null);
   const [contacts, setContacts] = useState<any[]>([]);
   const [filteredContacts, setFilteredContacts] = useState<any[]>([]);
   const [contactToEdit, setContactToEdit] = useState<any | null>(null);
@@ -78,7 +80,6 @@ const HomePage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  // Abre o modal de confirmação de exclusão de contato
   const handleDeleteContact = (cpf: string) => {
     const contact = contacts.find((c) => c.cpf === cpf);
     setContactToDelete(contact);
@@ -91,6 +92,9 @@ const HomePage: React.FC = () => {
         user.email,
         contactToDelete.cpf
       );
+      
+      addToast(result.message, result.success ? "success" : "error");
+
       if (result.success) {
         loadContacts();
         setSelectedContact(null);
@@ -98,12 +102,12 @@ const HomePage: React.FC = () => {
         console.error(result.message);
       }
     }
-    setIsDeleteContactDialogOpen(false); // Fecha o modal após a confirmação
+    setIsDeleteContactDialogOpen(false);
   };
 
   const handleCloseDeleteContactDialog = () => {
     setContactToDelete(null);
-    setIsDeleteContactDialogOpen(false); // Fecha o modal sem excluir
+    setIsDeleteContactDialogOpen(false);
   };
 
   const handleSelectContact = (contact: any) => {

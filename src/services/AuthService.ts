@@ -22,7 +22,7 @@ class AuthService {
     );
     if (user) {
       const token = md5(email + Date.now());
-      const expiresAt = Date.now() + 1500 * 60 * 1000; // 15 minutos
+      const expiresAt = Date.now() + 30 * 60 * 1000;
       localStorage.setItem(TOKEN_KEY, JSON.stringify({ token, expiresAt }));
       localStorage.setItem(LOGGED_USER_KEY, email);
       return true;

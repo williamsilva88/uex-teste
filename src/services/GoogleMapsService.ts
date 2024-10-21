@@ -3,7 +3,6 @@ import axios from "axios";
 class GoogleMapsService {
   private baseUrl = "https://maps.googleapis.com/maps/api";
 
-  // Método para buscar sugestões de endereços com base no input do usuário
   async getAutocompleteSuggestions(query: string) {
     const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     try {
@@ -26,7 +25,6 @@ class GoogleMapsService {
     }
   }
 
-  // Método para obter detalhes do endereço selecionado com base no place_id
   async getPlaceDetails(placeId: string) {
     const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     try {

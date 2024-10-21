@@ -28,10 +28,7 @@ class ContactService {
       );
   
       if (existingContact) {
-        return {
-          success: false,
-          message: "CPF já cadastrado para este usuário",
-        };
+        return { success: false, message: "CPF já cadastrado para este usuário" };
       }
   
       users[userIndex].contacts.push(contact);

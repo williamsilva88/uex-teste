@@ -6,6 +6,7 @@ import ContactService from "../services/ContactService";
 import AuthService from "../services/AuthService";
 import ViaCepService from "../services/ViaCepService";
 import "./ContactModal.css";
+import { useToast } from "../contexts/ToastContext";
 import GoogleMapsService from "../services/GoogleMapsService";
 
 type ContactModalProps = {
@@ -15,13 +16,11 @@ type ContactModalProps = {
   initialContact?: any;
 };
 
-// Função para aplicar máscara em tempo real
 const applyMask = (value: string, mask: string) => {
   let i = 0;
   return mask.replace(/9/g, () => value[i++] || "");
 };
 
-// Formata os campos com máscara ao carregar dados na edição
 const formatMaskedFields = (contact: any) => {
   if (contact.cpf) contact.cpf = applyMask(contact.cpf, "999.999.999-99");
   if (contact.phone) contact.phone = applyMask(contact.phone, "(99) 999999999");
@@ -35,6 +34,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
   onSuccess,
   initialContact,
 }) => {
+  const { addToast } = useToast();
+  
   const refs = {
     name: useRef<HTMLInputElement>(null),
     cpf: useRef<HTMLInputElement>(null),
@@ -91,9 +92,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
         }
       } catch (error) {
         console.error("Erro ao consultar o ViaCEP:", error);
-        alert(
-          "Não foi possível consultar o CEP. Verifique o valor e tente novamente."
-        );
+        addToast("Não foi possível consultar o CEP. Verifique o valor e tente novamente.", "error");
       }
     }
   };
@@ -131,14 +130,14 @@ const ContactModal: React.FC<ContactModalProps> = ({
         result = ContactService.addContact(user.email, updatedContact);
       }
 
+      addToast(result.message, result.success ? "success" : "error");
+
       if (result.success) {
         onSuccess();
         onClose();
-      } else {
-        alert(result.message);
       }
     } else {
-      alert("Usuário não autenticado.");
+      addToast("Usuário não autenticado.", "error");
     }
   };
 
@@ -187,7 +186,6 @@ const ContactModal: React.FC<ContactModalProps> = ({
             style={styleField}
           ></md-filled-text-field>
 
-          {/* Campo CPF com máscara e desabilitação */}
           {isEditing ? (
             <md-filled-text-field
               ref={refs.cpf}

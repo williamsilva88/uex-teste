@@ -42,14 +42,10 @@
     flex-grow: 1;
 }
 
-.bar-controls-head {}
-
 .bar-controls-content {
     height: 100%;
     width: 100%;
 }
-
-.bar-controls-footer {}
 
 .contacts-title {
     border-top: 1px solid #d6d6d6;
