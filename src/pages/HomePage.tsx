@@ -14,6 +14,10 @@ const HomePage: React.FC = () => {
   const user = AuthService.getLoggedUser();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // Modal de exclusão de conta
+  const [isDeleteContactDialogOpen, setIsDeleteContactDialogOpen] =
+    useState(false); // Modal de exclusão de contato
+  const [contactToDelete, setContactToDelete] = useState<any | null>(null); // Contato a ser excluído
   const [contacts, setContacts] = useState<any[]>([]);
   const [filteredContacts, setFilteredContacts] = useState<any[]>([]);
   const [contactToEdit, setContactToEdit] = useState<any | null>(null);
@@ -74,12 +78,19 @@ const HomePage: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  // Abre o modal de confirmação de exclusão de contato
   const handleDeleteContact = (cpf: string) => {
-    const confirmDelete = window.confirm(
-      "Tem certeza de que deseja excluir este contato?"
-    );
-    if (confirmDelete) {
-      const result = ContactService.deleteContact(user.email, cpf);
+    const contact = contacts.find((c) => c.cpf === cpf);
+    setContactToDelete(contact);
+    setIsDeleteContactDialogOpen(true);
+  };
+
+  const handleConfirmDeleteContact = () => {
+    if (contactToDelete) {
+      const result = ContactService.deleteContact(
+        user.email,
+        contactToDelete.cpf
+      );
       if (result.success) {
         loadContacts();
         setSelectedContact(null);
@@ -87,6 +98,12 @@ const HomePage: React.FC = () => {
         console.error(result.message);
       }
     }
+    setIsDeleteContactDialogOpen(false); // Fecha o modal após a confirmação
+  };
+
+  const handleCloseDeleteContactDialog = () => {
+    setContactToDelete(null);
+    setIsDeleteContactDialogOpen(false); // Fecha o modal sem excluir
   };
 
   const handleSelectContact = (contact: any) => {
@@ -126,14 +143,17 @@ const HomePage: React.FC = () => {
     setIsSettingsOpen(false);
   };
 
-  const handleDeleteAccount = () => {
-    const confirmDelete = window.confirm(
-      "Tem certeza de que deseja excluir sua conta? Essa ação não pode ser desfeita."
-    );
-    if (confirmDelete) {
-      AuthService.deleteAccount();
-      handleLogout();
-    }
+  const handleOpenDeleteDialog = () => {
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+  };
+
+  const handleConfirmDeleteAccount = () => {
+    AuthService.deleteAccount();
+    handleLogout();
   };
 
   return (
@@ -152,7 +172,7 @@ const HomePage: React.FC = () => {
               <div className="settings-container">
                 <button
                   className="delete-account-button"
-                  onClick={handleDeleteAccount}
+                  onClick={handleOpenDeleteDialog}
                 >
                   Excluir Conta
                 </button>
@@ -204,14 +224,14 @@ const HomePage: React.FC = () => {
       </div>
 
       <div className="content">
-        {selectedContact && (
+      
           <MapComponent
-            latitude={selectedContact.latitude}
-            longitude={selectedContact.longitude}
-            description={selectedContact.name}
-            address={selectedContact.address}
+            latitude={selectedContact?.latitude}
+            longitude={selectedContact?.longitude}
+            description={selectedContact?.name}
+            address={selectedContact?.address}
           />
-        )}
+    
       </div>
 
       <ContactModal
@@ -220,6 +240,56 @@ const HomePage: React.FC = () => {
         onSuccess={handleAddContact}
         initialContact={contactToEdit}
       />
+
+      {/* Modal de confirmação de exclusão de conta */}
+      {isDeleteDialogOpen && (
+        <md-dialog open>
+          <div slot="headline">Excluir Conta</div>
+          <form slot="content" id="delete-form" method="dialog">
+            Tem certeza de que deseja excluir sua conta? Essa ação não pode ser
+            desfeita.
+          </form>
+          <div slot="actions">
+            <md-text-button
+              form="delete-form"
+              onClick={handleConfirmDeleteAccount}
+            >
+              Confirmar
+            </md-text-button>
+            <md-text-button
+              form="delete-form"
+              onClick={handleCloseDeleteDialog}
+            >
+              Cancelar
+            </md-text-button>
+          </div>
+        </md-dialog>
+      )}
+
+      {/* Modal de confirmação de exclusão de contato */}
+      {isDeleteContactDialogOpen && (
+        <md-dialog open>
+          <div slot="headline">Excluir Contato</div>
+          <form slot="content" id="delete-contact-form" method="dialog">
+            Tem certeza de que deseja excluir o contato "{contactToDelete?.name}
+            "?
+          </form>
+          <div slot="actions">
+            <md-text-button
+              form="delete-contact-form"
+              onClick={handleConfirmDeleteContact}
+            >
+              Confirmar
+            </md-text-button>
+            <md-text-button
+              form="delete-contact-form"
+              onClick={handleCloseDeleteContactDialog}
+            >
+              Cancelar
+            </md-text-button>
+          </div>
+        </md-dialog>
+      )}
     </div>
   );
 };

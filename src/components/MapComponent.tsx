@@ -32,8 +32,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [isInfoWindowOpen, setIsInfoWindowOpen] = useState(true);
 
   const center = {
-    lat: latitude ?? defaultCenter.lat,
-    lng: longitude ?? defaultCenter.lng,
+    lat: latitude ?? defaultCenter?.lat,
+    lng: longitude ?? defaultCenter?.lng,
   };
 
   const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
