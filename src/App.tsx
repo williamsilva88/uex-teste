@@ -1,20 +1,18 @@
-import React from 'react';
-import './App.css';
-import MapComponent from './components/MapComponent';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import "./App.css";
 
-function App() {
-  // Exemplo de coordenadas (Curitiba)
-  const latitude = -25.427;
-  const longitude = -49.273;
-  const description = "Residência Marcos da Silva";
-
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <h1>Mapa com React e Vite</h1>
-      {/* Componente MapComponent com coordenadas definidas */}
-      <MapComponent latitude={latitude} longitude={longitude} description={description}/>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/home" element={<HomePage />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;
